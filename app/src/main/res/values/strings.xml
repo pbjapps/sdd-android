@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Symphony Daily Devotions</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="pause_button_desc">Pause button.</string>
+    <string name="stop_button_desc">Stop button.</string>
+    <string name="play_button_desc">Play button.</string>
+    <string name="center_image_desc">Symphony Logo</string>
+    <string name="init_time">0:00/0:00</string>
+</resources>
