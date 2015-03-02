@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android" >
     <item android:state_pressed="true"
-          android:drawable="@drawable/stopme_pressed" /> <!-- pressed -->
-   
-    <item android:drawable="@drawable/stopme" /> <!-- default -->
+        android:drawable="@drawable/stop_button_pressed" /> <!-- pressed -->
+    <item android:state_enabled="true"
+        android:drawable="@drawable/stop_button_enabled" /> <!-- enabled -->
+    <item android:drawable="@drawable/stop_button_default" /> <!-- default -->
 </selector>
 
 

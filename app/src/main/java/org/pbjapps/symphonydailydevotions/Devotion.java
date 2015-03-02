@@ -29,6 +29,7 @@ public class Devotion {
     String title;
     String passage;
     String duration;
+    String speaker;
 
     public Devotion(JSONObject devotionJSON) {
 
@@ -49,6 +50,7 @@ public class Devotion {
             this.title = devotionJSON.getString("title");
             this.passage = devotionJSON.getString("passage");
             this.duration = devotionJSON.getString("duration");
+            this.speaker = devotionJSON.getString("speaker");
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -81,4 +83,6 @@ public class Devotion {
     public String getDuration() {
         return duration;
     }
+
+    public String getSpeaker() { return speaker; }
 }

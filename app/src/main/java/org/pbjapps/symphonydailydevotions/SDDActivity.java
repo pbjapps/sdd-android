@@ -1,5 +1,6 @@
 package org.pbjapps.symphonydailydevotions;
 
+import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -32,6 +33,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -158,7 +160,7 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         if (devotionPlayer != null) {
-            Log.println(Log.INFO, "SSD-devotionPlayer", "Resetting devotionPlayer and disabling player buttons and seek bar.");
+            // Log.println(Log.INFO, "SSD-devotionPlayer", "Resetting devotionPlayer and disabling player buttons and seek bar.");
             devotionPlayer.stop();
             devotionPlayer.release();
             playButton.setEnabled(false);
@@ -177,14 +179,14 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
                 if (pDialog.isShowing()) {
                     pDialog.dismiss();
                 }
-                Log.println(Log.INFO, "SSD-devotionPlayer", "devotionPlayer is prepared, enabling playButton.");
+                // Log.println(Log.INFO, "SSD-devotionPlayer", "devotionPlayer is prepared, enabling playButton.");
                 playButton.setEnabled(true);
                 seekBar.setEnabled(true);
                 seekBar.setMax(devotionPlayer.getDuration());
                 seekUpdation();
             }
         });
-        Log.println(Log.INFO, "SSD-devotionPlayer", "Initialized new devotionPlayer.");
+        // Log.println(Log.INFO, "SSD-devotionPlayer", "Initialized new devotionPlayer.");
     }
 
     public void retrieveDevotion(Calendar calendar) {
@@ -195,15 +197,16 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
         getCurrentValues(calendar);
         SimpleDateFormat date = new SimpleDateFormat("E MM/dd/yyyy", Locale.getDefault());
         dateButton.setText(date.format(calendar.getTime()));
-        Log.println(Log.INFO, "SSD-source", "Retrieving media for " + date.format(calendar.getTime()));
+        // Log.println(Log.INFO, "SSD-source", "Retrieving media for " + date.format(calendar.getTime()));
 
         // expected source URL: "http://pbjapps.github.io/sdd/generated_data/2014/June/2014-06-10.json"
         currentSource = source + selectedYear + "/" + selectedMonth + "/" + selectedDate + ".json";
-        Log.println(Log.INFO, "SSD-source", "Source URL: " + currentSource);
+        // Log.println(Log.INFO, "SSD-source", "Source URL: " + currentSource);
         initPlayer();
         new HttpAsyncTask().execute(currentSource);
     }
 
+    @TargetApi(16)
     public void seekUpdation() {
 
         // sets the mp3's elapsed time in format 0:00
@@ -244,7 +247,7 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_sdd, menu);
+        // getMenuInflater().inflate(R.menu.menu_sdd, menu);
         return true;
     }
 
@@ -276,8 +279,8 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
         selectedMonth = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
         selectedYear = year.format(today);
         selectedDate = date.format(today);
-        Log.println(Log.INFO, "SSD-parseDate", "Parsed selections for " + date.format(today));
-        Log.println(Log.INFO, "SSD-parseDate", "selectedMonth: " + selectedMonth + ", selectedYear: " + selectedYear + ", selectedDate: " + selectedDate );
+        // Log.println(Log.INFO, "SSD-parseDate", "Parsed selections for " + date.format(today));
+        // Log.println(Log.INFO, "SSD-parseDate", "selectedMonth: " + selectedMonth + ", selectedYear: " + selectedYear + ", selectedDate: " + selectedDate );
     }
 
     @Override
@@ -285,9 +288,10 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
 
         if (v == playButton && playButton.isEnabled()) {
             if (!devotionPlayer.isPlaying()) {
-                Log.println(Log.INFO, "SSD-playButton", "playButton clicked, starting devotionPlayer.");
+                // Log.println(Log.INFO, "SSD-playButton", "playButton clicked, starting devotionPlayer.");
                 devotionPlayer.start();
                 seekUpdation();
+                playButton.setEnabled(false);
                 pauseButton.setEnabled(true);
                 stopButton.setEnabled(true);
             }
@@ -295,7 +299,7 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
 
         if (v == pauseButton && pauseButton.isEnabled()) {
             if (devotionPlayer.isPlaying()) {
-                Log.println(Log.INFO, "SSD-pauseButton", "pauseButton clicked, pausing devotionPlayer.");
+                // Log.println(Log.INFO, "SSD-pauseButton", "pauseButton clicked, pausing devotionPlayer.");
                 devotionPlayer.pause();
                 seekUpdation();
                 pauseButton.setEnabled(false);
@@ -312,8 +316,8 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
         }
 
         if (v == stopButton && stopButton.isEnabled()) {
-            if (devotionPlayer.isPlaying()) {
-                Log.println(Log.INFO, "SSD-stopButton", "stopButton clicked, stopping devotionPlayer.");
+            if (devotionPlayer.isPlaying() || devotionPlayer.getCurrentPosition() > 0) {
+                // Log.println(Log.INFO, "SSD-stopButton", "stopButton clicked, stopping devotionPlayer.");
                 seekUpdation();
                 devotionPlayer.pause();
                 devotionPlayer.seekTo(0);
@@ -348,7 +352,7 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
         } else if (future.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
             future.add(Calendar.DAY_OF_MONTH, -2);
         }
-        Log.println(Log.INFO, "SSD-date", "Bounding selected dates with [ " + date.format(past.getTime()) + ", " + date.format(future.getTime()) + " ].");
+        // Log.println(Log.INFO, "SSD-date", "Bounding selected dates with [ " + date.format(past.getTime()) + ", " + date.format(future.getTime()) + " ].");
 
         // TODO: Handle corner-case for weekends: navigating to another date and back fails
 
@@ -410,6 +414,8 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
 
         SimpleDateFormat date = new SimpleDateFormat("E MM/dd/yyyy", Locale.getDefault());
+        SimpleDateFormat time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat userTime = new SimpleDateFormat("hh:mm a", Locale.getDefault());
 
         @Override
         protected void onPreExecute() {
@@ -438,32 +444,70 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
             try {
                 JSONObject devotionJSON = new JSONObject(result);
                 currentDevotion = new Devotion(devotionJSON);
-                Log.println(Log.INFO, "SSD-JSON", "Setting JSON texts for [date, id, title, passage]: [ "
-                        + date.format(currentDevotion.getDate()) + ", "
-                        + currentDevotion.getId() + ", "
-                        + currentDevotion.getTitle() + ", "
-                        + currentDevotion.getPassage() + " ].");
-                ( (TextView) findViewById(R.id.date)).setText(date.format(currentDevotion.getDate()));
-                ( (TextView) findViewById(R.id.id)).setText(currentDevotion.getId());
-                ( (TextView) findViewById(R.id.title)).setText(currentDevotion.getTitle());
-                ( (TextView) findViewById(R.id.passage)).setText(currentDevotion.getPassage());
+//                Log.println(Log.INFO, "SSD-JSON", "Setting JSON texts for [date, id, title, passage]: [ "
+//                        + date.format(currentDevotion.getDate()) + ", "
+//                        + currentDevotion.getId() + ", "
+//                        + currentDevotion.getTitle() + ", "
+//                        + currentDevotion.getPassage() + " ].");
+                String metadata = "[" + currentDevotion.getId() + "] " + currentDevotion.getTitle()
+                        + ": " + currentDevotion.getPassage() + ", by " + currentDevotion.getSpeaker()
+                        + " on " + date.format(currentDevotion.getDate()) + ".";
+                ( (TextView) findViewById(R.id.data)).setText(metadata);
 
-                try {
-                    devotionPlayer.setDataSource(currentDevotion.getSource().toString());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                if (canFetchMedia()) {
+
+                    try {
+                        devotionPlayer.setDataSource(currentDevotion.getSource().toString());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    devotionPlayer.prepareAsync();
+
+                    pDialog = new ProgressDialog(SDDActivity.this);
+                    pDialog.setMessage("Fetching devotion media...");
+                    pDialog.setCancelable(false);
+                    pDialog.show();
+
+                    // TODO: Need a graceful timeout if the stream is unresolvable
+
+                } else {
+
+                    try {
+                        Toast.makeText(getBaseContext(), "Sorry! The " + date.format(currentDevotion.getDate()) + " devotion is available after " + userTime.format(time.parse(currentDevotion.getTime())) + ".", Toast.LENGTH_LONG).show();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
                 }
-                devotionPlayer.prepareAsync();
 
-                pDialog = new ProgressDialog(SDDActivity.this);
-                pDialog.setMessage("Fetching devotion media...");
-                pDialog.setCancelable(false);
-                pDialog.show();
-
-                // TODO: Need a graceful timeout if the stream is unresolvable
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }
+
+        private boolean canFetchMedia() {
+            Calendar currentTime = Calendar.getInstance();
+
+            // Log.println(Log.INFO, "SSD-canFetchMedia", "Current time: " + currentTime.getTime().toString() +  ".");
+
+            String devotionTime = currentDevotion.getTime();
+            if (devotionTime == null || devotionTime.isEmpty()) {
+                devotionTime = "7:45:00";
+            }
+
+            // Log.println(Log.INFO, "SSD-canFetchMedia", "Devotion time: " + devotionTime +  ".");
+
+            Calendar availableTime = Calendar.getInstance();
+            try {
+                availableTime.setTime(time.parse(devotionTime));
+                availableTime.set(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH), currentTime.get(Calendar.DAY_OF_MONTH));
+                // Log.println(Log.INFO, "SSD-canFetchMedia", "Available time: " + availableTime.getTime().toString() +  ". Result: " + currentTime.after(availableTime) + ".");
+                return currentTime.after(availableTime);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            return true;
         }
     }
 
