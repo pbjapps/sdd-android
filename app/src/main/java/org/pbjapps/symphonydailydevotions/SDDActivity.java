@@ -494,13 +494,16 @@ public class SDDActivity extends ActionBarActivity implements View.OnClickListen
             if (devotionTime == null || devotionTime.isEmpty()) {
                 devotionTime = "7:45:00";
             }
+            Calendar devotionDate = Calendar.getInstance();
+            devotionDate.setTime(currentDevotion.getDate());
+
 
             // Log.println(Log.INFO, "SSD-canFetchMedia", "Devotion time: " + devotionTime +  ".");
 
             Calendar availableTime = Calendar.getInstance();
             try {
                 availableTime.setTime(time.parse(devotionTime));
-                availableTime.set(currentTime.get(Calendar.YEAR), currentTime.get(Calendar.MONTH), currentTime.get(Calendar.DAY_OF_MONTH));
+                availableTime.set(devotionDate.get(Calendar.YEAR), devotionDate.get(Calendar.MONTH), devotionDate.get(Calendar.DAY_OF_MONTH));
                 // Log.println(Log.INFO, "SSD-canFetchMedia", "Available time: " + availableTime.getTime().toString() +  ". Result: " + currentTime.after(availableTime) + ".");
                 return currentTime.after(availableTime);
             } catch (ParseException e) {
